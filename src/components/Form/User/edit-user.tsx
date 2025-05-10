@@ -37,12 +37,12 @@ import { useRouter, useSearchParams } from "next/navigation"
 // Form validation schema using Zod
 const formSchema = z.object({
     name: z.string().min(1, { message: "Tên người dùng không được để trống" }),
-    password: z.string().min(0, { message: "Mật khẩu không được để trống" }).optional(),
     email: z.string().email({ message: "Email không hợp lệ." }),
     role_id: z.string().min(1, { message: "Vui lòng chọn vai trò" }),
     company_id: z.string().min(1, { message: "Vui lòng chọn công ty" }),
     department_id: z.string().nullable(),
     team_id: z.string().nullable(),
+    password: z.string().min(0, { message: "Mật khẩu không được để trống" }).optional(),
 })
 
 export function UserEdit() {
@@ -114,7 +114,12 @@ export function UserEdit() {
         try {
             const token = localStorage.getItem("token")
 
-            await axios.put(`https://qthl-group.onrender.com/api/user/${userId}`, values, {
+            const dataToSubmit = {
+                ...values,
+                ...(values.password && values.password !== "" ? { password: values.password } : {}),  // Only include password if not empty
+            };
+
+            await axios.put(`https://qthl-group.onrender.com/api/user/${userId}`, dataToSubmit, {
                 headers: { Authorization: `Bearer ${token}` },
             })
             form.reset()
