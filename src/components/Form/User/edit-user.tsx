@@ -37,7 +37,7 @@ import { useRouter, useSearchParams } from "next/navigation"
 // Form validation schema using Zod
 const formSchema = z.object({
     name: z.string().min(1, { message: "Tên người dùng không được để trống" }),
-    password: z.string().min(0, { message: "" }),
+    password: z.string().min(0, { message: "Mật khẩu không được để trống" }).optional(),
     email: z.string().email({ message: "Email không hợp lệ." }),
     role_id: z.string().min(1, { message: "Vui lòng chọn vai trò" }),
     company_id: z.string().min(1, { message: "Vui lòng chọn công ty" }),
@@ -97,8 +97,6 @@ export function UserEdit() {
                     form.setValue("company_id", user.company_id);
                     form.setValue("department_id", user.department_id || null);
                     form.setValue("team_id", user.team_id || null);
-                    // Đặt password vào form nếu cần
-                    form.setValue("password", "");  // Nếu bạn muốn hiển thị password, nhưng nhớ bảo mật
                 })
                 .catch(error => {
                     console.error("Error fetching user data:", error);
@@ -116,14 +114,11 @@ export function UserEdit() {
         try {
             const token = localStorage.getItem("token")
 
-            // Kiểm tra xem mật khẩu có được nhập lại không
-            if (!values.password || values.password === "") {
-                // Nếu không có password, tạo một bản sao mới và xóa trường password
-                const { password, ...updatedValues } = values;  // Loại bỏ password khỏi bản sao
-                values = updatedValues as z.infer<typeof formSchema>;  // Đảm bảo kiểu vẫn đúng
-            }
+            // Handle password: only send it if it's not empty
+            const { password, ...updatedValues } = values;  // Remove password from the copy
+            const dataToSubmit = password ? { ...updatedValues, password } : updatedValues;
 
-            await axios.put(`https://qthl-group.onrender.com/api/user/${userId}`, values, {
+            await axios.put(`https://qthl-group.onrender.com/api/user/${userId}`, dataToSubmit, {
                 headers: { Authorization: `Bearer ${token}` },
             })
             form.reset()
