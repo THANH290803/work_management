@@ -26,11 +26,14 @@ export interface Company {
 export interface Team {
   _id: string;
   name: string;
+  department_id: Department;
 }
+
 
 export interface Department {
   _id: string;
   name: string;
+  company_id: Company;  // This now references the Company interface
 }
 
 export function useUsers() {
@@ -39,6 +42,9 @@ export function useUsers() {
   const [companies, setCompanies] = useState<Company[]>([]);
   const [teams, setTeams] = useState<Team[]>([]); // New state for teams
   const [departments, setDepartments] = useState<Department[]>([]); // New state for departments
+  const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(null);
+  const [teamsByDepartment, setTeamsByDepartment] = useState<Team[]>([]);
+  const [selectedDepartmentId, setSelectedDepartmentId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -78,6 +84,65 @@ export function useUsers() {
 
     fetchData();
   }, []);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+
+    const fetchDepartmentsByCompany = async () => {
+      if (!selectedCompanyId) return;
+
+      try {
+        const response = await axios.get(
+          `https://qthl-group.onrender.com/api/department/company/${selectedCompanyId}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+
+        // Nếu phản hồi thành công và có dữ liệu phòng ban
+        if (response.status === 200) {
+          if (response.data.length > 0) {
+            setDepartments(response.data);
+          } else {
+            setDepartments([]); // Nếu không có phòng ban
+          }
+        }
+      } catch (error) {
+        console.error("Lỗi khi lấy phòng ban theo công ty:", error);
+        setDepartments([]); // reset nếu có lỗi
+      }
+    };
+    fetchDepartmentsByCompany();
+  }, [selectedCompanyId]);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+
+    const fetchTeamsByDepartment = async () => {
+      if (!selectedDepartmentId) return; // Kiểm tra nếu không có phòng ban được chọn
+
+      try {
+        const response = await axios.get(
+          `https://qthl-group.onrender.com/api/team/department/${selectedDepartmentId}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+
+        // Nếu phản hồi thành công
+        if (response.status === 200) {
+          setTeamsByDepartment(response.data);
+        }
+      } catch (error) {
+        console.error("Lỗi khi lấy team theo phòng ban:", error);
+        setTeamsByDepartment([]); // Reset nếu có lỗi
+      }
+    };
+
+    fetchTeamsByDepartment();
+  }, [selectedDepartmentId]); // Dependency: khi phòng ban thay đổi
+
+
 
   const getRoleName = (roleId: string) => {
     return roles.find((r) => r._id === roleId)?.name || "N/A";
@@ -143,5 +208,9 @@ export function useUsers() {
     currentUsers,
     paginate,
     handleDelete,
+    selectedCompanyId,
+    setSelectedCompanyId,
+    teamsByDepartment,
+    setSelectedDepartmentId
   };
 }

@@ -31,11 +31,13 @@ import {
 import axios from "axios"
 import { useUsers } from "@/lib/useUser"
 import * as React from "react"
-import { useState } from "react";
+import { useState, useEffect } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 
+// Form validation schema using Zod
 const formSchema = z.object({
     name: z.string().min(1, { message: "Tên người dùng không được để trống" }),
-    password: z.string().min(1, { message: "Password không được để trống" }),
+    password: z.string().min(0, { message: "" }),
     email: z.string().email({ message: "Email không hợp lệ." }),
     role_id: z.string().min(1, { message: "Vui lòng chọn vai trò" }),
     company_id: z.string().min(1, { message: "Vui lòng chọn công ty" }),
@@ -43,19 +45,18 @@ const formSchema = z.object({
     team_id: z.string().nullable(),
 })
 
-export function AddUser() {
+export function UserEdit() {
+    const router = useRouter();
+    const { roles, companies, departments, teams, selectedCompanyId, setSelectedCompanyId } = useUsers()
+
     const [rolePopoverOpen, setRolePopoverOpen] = useState(false);
     const [companyPopoverOpen, setCompanyPopoverOpen] = useState(false);
     const [teamPopoverOpen, setTeamPopoverOpen] = useState(false);
     const [departmentPopoverOpen, setDepartmentPopoverOpen] = useState(false);
-    const {
-        roles,
-        companies,
-        departments,
-        teams,
-        selectedCompanyId,
-        setSelectedCompanyId,
-    } = useUsers()
+
+    const searchParams = useSearchParams();
+    const userId = searchParams.get("id");
+    console.log(userId);
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -70,6 +71,41 @@ export function AddUser() {
         },
     });
 
+    // Fetch user data on component mount
+    useEffect(() => {
+        if (userId) {
+            // Lấy token từ localStorage
+            const token = localStorage.getItem("token");
+
+            if (!token) {
+                console.error("Không tìm thấy token!");
+                return;
+            }
+
+            // Gửi yêu cầu GET với token trong header
+            axios.get(`https://qthl-group.onrender.com/api/user/${userId}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            })
+                .then(response => {
+                    const user = response.data;
+                    // Set form values with fetched data
+                    form.setValue("name", user.name);
+                    form.setValue("email", user.email);
+                    form.setValue("role_id", user.role_id);
+                    form.setValue("company_id", user.company_id);
+                    form.setValue("department_id", user.department_id || null);
+                    form.setValue("team_id", user.team_id || null);
+                    // Đặt password vào form nếu cần
+                    form.setValue("password", "");  // Nếu bạn muốn hiển thị password, nhưng nhớ bảo mật
+                })
+                .catch(error => {
+                    console.error("Error fetching user data:", error);
+                });
+        }
+    }, [userId, form]);
+
     // Handle company selection
     const handleCompanyChange = (companyId: string) => {
         form.setValue("company_id", companyId);  // Update form state with selected company
@@ -77,17 +113,23 @@ export function AddUser() {
     };
 
     const onSubmit = async (values: z.infer<typeof formSchema>) => {
-        console.log(values);
         try {
             const token = localStorage.getItem("token")
-            await axios.post("https://qthl-group.onrender.com/api/user/post", values, {
+
+            // Kiểm tra xem mật khẩu có được nhập lại không
+            if (!values.password || values.password === "") {
+                // Nếu không có password, tạo một bản sao mới và xóa trường password
+                const { password, ...updatedValues } = values;  // Loại bỏ password khỏi bản sao
+                values = updatedValues as z.infer<typeof formSchema>;  // Đảm bảo kiểu vẫn đúng
+            }
+
+            await axios.put(`https://qthl-group.onrender.com/api/user/${userId}`, values, {
                 headers: { Authorization: `Bearer ${token}` },
             })
-            alert("Thêm người dùng thành công!")
             form.reset()
-            window.location.href = "/user"
+            router.push('/user')
         } catch (error) {
-            console.error("Lỗi khi thêm người dùng:", error)
+            console.error("Lỗi khi Sửa người dùng:", error)
         }
     }
 
@@ -326,26 +368,24 @@ export function AddUser() {
                                             <CommandList>
                                                 <CommandEmpty>Không tìm thấy team.</CommandEmpty>
                                                 <CommandGroup>
-                                                    {teams
-                                                        .filter(team => team.department_id._id === form.watch("department_id"))  // Filter teams by department_id
-                                                        .map((team) => (
-                                                            <CommandItem
-                                                                key={team._id}
-                                                                value={team.name}
-                                                                onSelect={() => {
-                                                                    form.setValue("team_id", team._id);
-                                                                    setTeamPopoverOpen(false);
-                                                                }}
-                                                            >
-                                                                <Check
-                                                                    className={cn(
-                                                                        "mr-2 h-4 w-4",
-                                                                        field.value === team._id ? "opacity-100" : "opacity-0"
-                                                                    )}
-                                                                />
-                                                                {team.name}
-                                                            </CommandItem>
-                                                        ))}
+                                                    {teams.map((team) => (
+                                                        <CommandItem
+                                                            key={team._id}
+                                                            value={team.name}
+                                                            onSelect={() => {
+                                                                form.setValue("team_id", team._id);
+                                                                setTeamPopoverOpen(false);
+                                                            }}
+                                                        >
+                                                            <Check
+                                                                className={cn(
+                                                                    "mr-2 h-4 w-4",
+                                                                    field.value === team._id ? "opacity-100" : "opacity-0"
+                                                                )}
+                                                            />
+                                                            {team.name}
+                                                        </CommandItem>
+                                                    ))}
                                                 </CommandGroup>
                                             </CommandList>
                                         </Command>
@@ -356,8 +396,7 @@ export function AddUser() {
                         </FormItem>
                     )}
                 />
-
-                <Button type="submit">Thêm người dùng</Button>
+                <Button type="submit">Cập nhật người dùng</Button>
             </form>
         </Form>
     )

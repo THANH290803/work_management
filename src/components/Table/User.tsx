@@ -95,7 +95,7 @@ export function User() {
                                             <DropdownMenuItem onClick={() => router.push(`/user/details?id=${user._id}`)}>
                                                 Chi tiết người dùng
                                             </DropdownMenuItem>
-                                            <DropdownMenuItem onClick={() => router.push(`/department/edit-department?id=${user._id}`)}>
+                                            <DropdownMenuItem onClick={() => router.push(`/user/edit-user?id=${user._id}`)}>
                                                 Sửa
                                             </DropdownMenuItem>
                                             <DropdownMenuItem className="text-red-500" onClick={() => handleDelete(user._id)}>
