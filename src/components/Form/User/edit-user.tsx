@@ -114,12 +114,7 @@ export function UserEdit() {
         try {
             const token = localStorage.getItem("token")
 
-            const dataToSubmit = {
-                ...values,
-                ...(values.password ? { password: values.password } : {}),  // Only include password if not empty
-            };
-
-            await axios.put(`https://qthl-group.onrender.com/api/user/${userId}`, dataToSubmit, {
+            await axios.put(`https://qthl-group.onrender.com/api/user/${userId}`, values, {
                 headers: { Authorization: `Bearer ${token}` },
             })
             form.reset()
