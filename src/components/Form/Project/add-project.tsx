@@ -28,8 +28,8 @@ import {
   CommandGroup,
   CommandEmpty,
 } from "@/components/ui/command"
-import { ChevronDown } from "lucide-react"
-// import { Calendar } from "@/components/ui/calendar" CalendarIcon,
+import { CalendarIcon, ChevronDown } from "lucide-react"
+import { Calendar } from "@/components/ui/calendar"
 import { format } from "date-fns"
 import { useProjects } from "@/lib/useProject"
 
@@ -222,7 +222,7 @@ export function AddProject() {
         />
 
         {/* Ngày bắt đầu và kết thúc */}
-        {/* <div className="flex gap-4">
+        <div className="flex gap-4">
          
           <FormField
             control={form.control}
@@ -268,7 +268,7 @@ export function AddProject() {
               </FormItem>
             )}
           />
-        </div> */}
+        </div>
 
         {/* Mô tả */}
         <FormField
