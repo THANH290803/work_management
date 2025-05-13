@@ -23,10 +23,10 @@ import { format } from "date-fns"
 import { useProjects } from "@/lib/useProject"
 
 const formSchema = z.object({
-    project_name: z.string().min(2, {
+    name: z.string().min(2, {
         message: "Project name must be at least 2 characters.",
     }),
-    project_description: z.string().min(5, {
+    description: z.string().min(5, {
         message: "Project description must be at least 5 characters.",
     }),
     company: z.string(),
@@ -35,6 +35,8 @@ const formSchema = z.object({
     start_date: z.string(),
     end_date: z.string(),
 })
+
+type FormData = z.infer<typeof formSchema>;
 
 export function AddProject() {
     const form = useForm({
@@ -56,15 +58,15 @@ export function AddProject() {
         companies,
         departments,
         teams,
-        selectedCompany,
+        // selectedCompany,
         setSelectedCompany,
-        selectedDepartment,
+        // selectedDepartment,
         setSelectedDepartment,
-        selectedTeam,
+        // selectedTeam,
         setSelectedTeam,
     } = useProjects();
 
-    const onSubmit = (data: any) => {
+    const onSubmit = (data: FormData) => {
         console.log("Form Data:", data)
     }
 
@@ -74,7 +76,7 @@ export function AddProject() {
                 {/* Project Name */}
                 <FormField
                     control={form.control}
-                    name="project_name"
+                    name="name"
                     render={({ field }) => (
                         <FormItem>
                             <FormLabel>Tên dự án</FormLabel>
@@ -100,6 +102,7 @@ export function AddProject() {
                                         role="combobox"
                                         aria-expanded={openCompany}
                                         className="w-[800px] justify-between"
+                                        {...field}
                                     >
                                         {companyValue || "-- Chọn công ty đảm nhiệm dự án --"}
                                         {openCompany ? <ChevronUp className="opacity-50" /> : <ChevronDown className="opacity-50" />}
@@ -147,6 +150,7 @@ export function AddProject() {
                                         role="combobox"
                                         aria-expanded={openDepartment}
                                         className="w-[800px] justify-between"
+                                        {...field}
                                     >
                                         {departmentValue || "-- Phòng ban đảm nhiệm dự án --"}
                                         {openDepartment ? <ChevronUp className="opacity-50" /> : <ChevronDown className="opacity-50" />}
@@ -194,6 +198,7 @@ export function AddProject() {
                                         role="combobox"
                                         aria-expanded={openTeam}
                                         className="w-[800px] justify-between"
+                                        {...field}
                                     >
                                         {teamValue || "-- Chọn Team đảm nhiệm dự án --"}
                                         {openTeam ? <ChevronUp className="opacity-50" /> : <ChevronDown className="opacity-50" />}
@@ -237,7 +242,7 @@ export function AddProject() {
                                 <FormLabel>Ngày bắt đầu</FormLabel>
                                 <Popover>
                                     <PopoverTrigger asChild>
-                                        <Button variant={"outline"} className="w-[390px] justify-start text-left font-normal">
+                                        <Button variant={"outline"} className="w-[390px] justify-start text-left font-normal" {...field}>
                                             <CalendarIcon />
                                             {dateStart ? format(dateStart, "dd-MM-yyyy") : <span>Chọn ngày bắt đầu dự án</span>}
                                         </Button>
@@ -259,7 +264,7 @@ export function AddProject() {
                                 <FormLabel>Ngày kết thúc</FormLabel>
                                 <Popover>
                                     <PopoverTrigger asChild>
-                                        <Button variant={"outline"} className="w-[390px] justify-start text-left font-normal">
+                                        <Button variant={"outline"} className="w-[390px] justify-start text-left font-normal" {...field}>
                                             <CalendarIcon />
                                             {dateEnd ? format(dateEnd, "dd-MM-yyyy") : <span>Chọn ngày kết thúc dự án</span>}
                                         </Button>
@@ -276,7 +281,7 @@ export function AddProject() {
                 {/* Project Description */}
                 <FormField
                     control={form.control}
-                    name="project_description"
+                    name="description"
                     render={({ field }) => (
                         <FormItem>
                             <FormLabel>Mô tả dự án</FormLabel>
