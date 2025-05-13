@@ -100,7 +100,7 @@ export function useProjects() {
         setCurrentPage(1);
     };
 
-    //
+    // Company, Departments, Team
     const [companies, setCompanies] = useState<Company[]>([]);
     const [departments, setDepartments] = useState<Department[]>([]);
     const [teams, setTeams] = useState<Team[]>([]);
