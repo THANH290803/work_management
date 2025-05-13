@@ -10,7 +10,7 @@ import {
     TableRow,
 } from "@/components/ui/table"
 import { Input } from "@/components/ui/input"
-import { useUsers } from "@/lib/useUser";
+// import { useprojects } from "@/lib/useprojects";
 import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation";
 import {
@@ -20,45 +20,44 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal } from "lucide-react";
+import { useProjects } from "@/lib/useProject";
 
 
-
-export function User() {
+export function Project() {
     const {
         searchTerm,
         setSearchTerm,
-        getRoleName,
-        getCompanyName,
         currentPage,
         rowsPerPage,
         handleRowsPerPageChange,
-        currentUsers,
+        filteredProjects,
+        currentProjects,
         paginate,
-        filteredUsers,
+        openEdit,
         handleDelete
-    } = useUsers();
+    } = useProjects();
 
     const router = useRouter();
 
     const handleClick = () => {
-        // Navigate to the department page when button is clicked
-        router.push("/user/add-user"); // Replace with the correct path
+        // Navigate to the project page when button is clicked
+        router.push("/project/add-project"); // Replace with the correct path
     };
 
     return (
         <>
 
             <div className="flex items-center justify-between">
-                <h1 style={{ fontWeight: 'bold', fontSize: '24px' }}>Danh sách người dùng</h1>
+                <h1 style={{ fontWeight: 'bold', fontSize: '24px' }}>Danh sách dự án</h1>
                 <Button variant="outline" className="bg-blue-500 text-white hover:bg-blue-600 py-2 px-4 rounded-md" onClick={handleClick}>
-                    Thêm người dùng
+                    Thêm dự án
                 </Button>
             </div>
 
             <div className="mb-4">
                 <Input
                     type="text"
-                    placeholder=" Tìm kiếm theo tên người dùng "
+                    placeholder=" Tìm kiếm theo tên dự án"
                     className="px-4 py-2 border border-gray-300 rounded-lg w-full max-w-md"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
@@ -70,20 +69,16 @@ export function User() {
             <Table>
                 <TableHeader>
                     <TableRow>
-                        <TableHead style={{ width: '200px' }}>No.</TableHead>
-                        <TableHead className="text-center">Tên người dùng</TableHead>
-                        <TableHead className="text-center">Trức vụ trong công ty</TableHead>
-                        <TableHead className="text-right">Trực thuộc công ty</TableHead>
+                        <TableHead style={{ width: '433px' }}>No.</TableHead>
+                        <TableHead className="text-center">Tên dự án</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {currentUsers.length > 0 ? (
-                        currentUsers.map((user, index) => (
-                            <TableRow key={user._id}>
+                    {currentProjects.length > 0 ? (
+                        currentProjects.map((project, index) => (
+                            <TableRow key={project._id}>
                                 <TableCell>{index + 1 + (currentPage - 1) * rowsPerPage}</TableCell>
-                                <TableCell className="text-center">{user.name}</TableCell>
-                                <TableCell className="text-center">{getRoleName(user.role_id)}</TableCell>
-                                <TableCell className="text-right">{getCompanyName(user.company_id)}</TableCell>
+                                <TableCell className="text-center">{project.name}</TableCell>
                                 <TableCell className="text-right">
                                     <DropdownMenu>
                                         <DropdownMenuTrigger asChild>
@@ -92,13 +87,10 @@ export function User() {
                                             </button>
                                         </DropdownMenuTrigger>
                                         <DropdownMenuContent align="end">
-                                            <DropdownMenuItem onClick={() => router.push(`/user/details?id=${user._id}`)}>
-                                                Chi tiết người dùng
-                                            </DropdownMenuItem>
-                                            <DropdownMenuItem onClick={() => router.push(`/user/edit-user?id=${user._id}`)}>
+                                            <DropdownMenuItem onClick={() => openEdit(project)}>
                                                 Sửa
                                             </DropdownMenuItem>
-                                            <DropdownMenuItem className="text-red-500" onClick={() => handleDelete(user._id)}>
+                                            <DropdownMenuItem className="text-red-500" onClick={() => handleDelete(project._id)}>
                                                 Xoá
                                             </DropdownMenuItem>
                                         </DropdownMenuContent>
@@ -108,8 +100,8 @@ export function User() {
                         ))
                     ) : (
                         <TableRow>
-                            <TableCell colSpan={4} className="text-center py-4 text-gray-500">
-                                Không có phòng ban
+                            <TableCell colSpan={3} className="text-center py-4 text-gray-500">
+                                Không có dự án
                             </TableCell>
                         </TableRow>
                     )}
@@ -145,12 +137,12 @@ export function User() {
 
                     <span className="text-sm">
                         Trang <strong>{currentPage}</strong> /{" "}
-                        {Math.ceil(filteredUsers.length / rowsPerPage)}
+                        {Math.ceil(filteredProjects.length / rowsPerPage)}
                     </span>
 
                     <button
                         onClick={() => paginate(currentPage + 1)}
-                        disabled={currentPage * rowsPerPage >= filteredUsers.length}
+                        disabled={currentPage * rowsPerPage >= filteredProjects.length}
                         className="px-3 py-2 rounded-md border text-sm hover:bg-gray-100 disabled:opacity-50"
                     >
                         Sau →

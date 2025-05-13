@@ -56,7 +56,7 @@ export function Department() {
             <div className="mb-4">
                 <Input
                     type="text"
-                    placeholder="Tìm kiếm theo tên phòng ban..."
+                    placeholder=" Tìm kiếm theo tên phòng ban"
                     className="px-4 py-2 border border-gray-300 rounded-lg w-full max-w-md"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}

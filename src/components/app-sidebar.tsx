@@ -8,9 +8,11 @@ import {
   GalleryVerticalEnd,
   // Map,
   // PieChart,
+  ShieldCheck,
   Settings2,
   Briefcase,
   LayoutDashboard,
+  Projector,
   Users
 } from "lucide-react"
 
@@ -45,9 +47,9 @@ const data = {
   ],
   navMain: [
     {
-      title: "demo1",
-      url: "#",
-      icon: Briefcase,
+      title: "Quản lý dự án",
+      url: "/project",
+      icon: Projector,
     },
     {
       title: "demo2",
@@ -116,6 +118,11 @@ const data = {
       name: "Quản lý người dùng",
       url: "/user",
       icon: Users,
+    },
+    {
+      name: "Quản lý vai trò",
+      url: "/role",
+      icon: ShieldCheck,
     },
   ],
 }
