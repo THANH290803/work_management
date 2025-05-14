@@ -11,8 +11,8 @@ export interface Project {
         email: string;
         role_id: string;
         company_id: string;
-        department_id: string | null;
-        team_id: string | null;
+        department_id: string | null; // department_id can be null
+        team_id: string | null; // team_id can be null
         createdAt: string;
         updatedAt: string;
     };
@@ -23,18 +23,18 @@ export interface Project {
         phone: string;
         email: string;
     };
-    department_id: {
+    department_id: {  // department_id can be null
         _id: string;
         name: string;
         company_id: string;
-    };
-    team_id: {
+    } | null; 
+    team_id: {  // team_id can be null
         _id: string;
         name: string;
         department_id: string;
-    };
-    start_date: string; // ISO 8601 date string
-    end_date: string; // ISO 8601 date string
+    } | null;
+    start_date: string | null; // start_date can be null
+    end_date: string | null; // end_date can be null
     created_at: string; // ISO 8601 date string
 }
 
@@ -131,10 +131,10 @@ export function useProjects() {
             if (selectedCompany) {
                 try {
                     const response = await axios.get(`https://qthl-group.onrender.com/api/department/company/${selectedCompany}`, {
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    }
-                });
+                        headers: {
+                            Authorization: `Bearer ${token}`
+                        }
+                    });
                     setDepartments(response.data);
                 } catch (error) {
                     console.error("Error fetching departments:", error);
@@ -150,10 +150,10 @@ export function useProjects() {
             if (selectedDepartment) {
                 try {
                     const response = await axios.get(`https://qthl-group.onrender.com/api/team/department/${selectedDepartment}`, {
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    }
-                });
+                        headers: {
+                            Authorization: `Bearer ${token}`
+                        }
+                    });
                     setTeams(response.data);
                 } catch (error) {
                     console.error("Error fetching teams:", error);
@@ -170,6 +170,7 @@ export function useProjects() {
         company_id: "",
         department_id: "",
         team_id: "",
+        created_by: "",
         start_date: "",
         end_date: "",
     });
@@ -177,6 +178,7 @@ export function useProjects() {
 
     const handleAddProject = async () => {
         const token = localStorage.getItem("token");
+        const userData = JSON.parse(localStorage.getItem("user") || '{}');
         if (!token) {
             console.error("Không tìm thấy token!");
             return;
@@ -198,6 +200,8 @@ export function useProjects() {
             return;
         }
 
+        const created_by = userData._id;
+
         try {
             await axios.post(
                 "https://qthl-group.onrender.com/api/project/post",
@@ -207,6 +211,7 @@ export function useProjects() {
                     company_id,
                     department_id,
                     team_id,
+                    created_by,
                     start_date,
                     end_date,
                 },
@@ -225,6 +230,7 @@ export function useProjects() {
                 team_id: "",
                 start_date: "",
                 end_date: "",
+                created_by: "",
             });
 
             window.location.href = ('/project'); // hoặc gọi lại fetchProjects()

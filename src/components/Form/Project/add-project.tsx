@@ -36,17 +36,37 @@ import { useProjects } from "@/lib/useProject"
 
 const formSchema = z.object({
   name: z.string().min(2, { message: "Tên dự án ít nhất 2 ký tự" }),
-  description: z.string().min(5, { message: "Mô tả ít nhất 5 ký tự" }),
+  description: z.union([z.string().min(5, { message: "Mô tả ít nhất 5 ký tự" }), z.literal("")]),
+
   company: z.string().min(1, { message: "Vui lòng chọn công ty" }),
-  department: z.string().min(1, { message: "Vui lòng chọn phòng ban" }),
-  team: z.string().min(1, { message: "Vui lòng chọn team" }),
-  start_date: z.date({ required_error: "Vui lòng chọn ngày bắt đầu" }),
-  end_date: z.date({ required_error: "Vui lòng chọn ngày kết thúc" }),
+  department: z.union([z.string().min(1, { message: "Vui lòng chọn phòng ban" }), z.literal("")]),
+  team: z.union([z.string().min(1, { message: "Vui lòng chọn team" }), z.literal("")]),
+
+  start_date: z.union([z.date(), z.null()]).refine(date => date instanceof Date || date === null, {
+    message: "Vui lòng chọn ngày bắt đầu",
+  }),
+  end_date: z.union([z.date(), z.null()]).refine(date => date instanceof Date || date === null, {
+    message: "Vui lòng chọn ngày kết thúc",
+  }),
 })
+
 
 type FormData = z.infer<typeof formSchema>
 
 export function AddProject() {
+  const {
+    companies,
+    departments,
+    teams,
+    setSelectedCompany,
+    setSelectedDepartment,
+    setSelectedTeam, // ⬅️ add this
+    handleAddProject,
+    // newProjectData,
+    setNewProjectData,
+  } = useProjects();
+
+
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -55,8 +75,8 @@ export function AddProject() {
       company: "",
       department: "",
       team: "",
-      start_date: undefined,
-      end_date: undefined,
+      start_date: null,
+      end_date: null,
     },
   })
 
@@ -64,22 +84,34 @@ export function AddProject() {
   const [openDepartmentPopover, setOpenDepartmentPopover] = useState(false);
   const [openTeamPopover, setOpenTeamPopover] = useState(false);
 
-  const {
-    companies,
-    departments,
-    teams,
-    setSelectedCompany,
-    setSelectedDepartment,
-    setSelectedTeam,
-  } = useProjects()
-
   const onSubmit = (data: FormData) => {
-    console.log("Dữ liệu gửi lên:", {
-      ...data,
-      start_date: format(data.start_date, "yyyy-MM-dd"),
-      end_date: format(data.end_date, "yyyy-MM-dd"),
-    })
+    const startDate = data.start_date ? new Date(data.start_date) : null;
+    const endDate = data.end_date ? new Date(data.end_date) : null;
+
+    if (startDate && endDate && startDate >= endDate) {
+      alert("Ngày kết thúc phải lớn hơn ngày bắt đầu.");
+      return;
+    }
+
+    // Ensure department_id and team_id are set to empty string instead of null
+    const departmentId = data.department || '';
+    const teamId = data.team || '';
+
+    setNewProjectData({
+      name: data.name,
+      description: data.description,
+      company_id: data.company,
+      department_id: departmentId,
+      team_id: teamId,
+      start_date: startDate ? startDate.toISOString() : '',
+      end_date: endDate ? endDate.toISOString() : '',
+      created_by: "",
+    });
+
+    handleAddProject();
   }
+
+
 
   return (
     <Form {...form}>
@@ -231,7 +263,7 @@ export function AddProject() {
 
         {/* Ngày bắt đầu và kết thúc */}
         <div className="flex gap-4">
-         
+
           <FormField
             control={form.control}
             name="start_date"
@@ -246,7 +278,12 @@ export function AddProject() {
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar selected={field.value} onSelect={field.onChange} mode="single" />
+                    <Calendar
+                      {...field}
+                      selected={field.value ? field.value : undefined}  // Fallback to `undefined` when `field.value` is `null`
+                      onSelect={field.onChange}
+                      mode="single"
+                    />
                   </PopoverContent>
                 </Popover>
                 <FormMessage />
@@ -254,7 +291,7 @@ export function AddProject() {
             )}
           />
 
-          
+
           <FormField
             control={form.control}
             name="end_date"
@@ -269,7 +306,12 @@ export function AddProject() {
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar selected={field.value} onSelect={field.onChange} mode="single" />
+                    <Calendar
+                      {...field}
+                      selected={field.value ?? undefined}  // Nullish coalescing to fallback to `undefined`
+                      onSelect={field.onChange}
+                      mode="single"
+                    />
                   </PopoverContent>
                 </Popover>
                 <FormMessage />
