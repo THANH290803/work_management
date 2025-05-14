@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { useState } from 'react'
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
@@ -59,6 +60,10 @@ export function AddProject() {
     },
   })
 
+  const [openCompanyPopover, setOpenCompanyPopover] = useState(false);
+  const [openDepartmentPopover, setOpenDepartmentPopover] = useState(false);
+  const [openTeamPopover, setOpenTeamPopover] = useState(false);
+
   const {
     companies,
     departments,
@@ -102,7 +107,7 @@ export function AddProject() {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Công ty nhận dự án</FormLabel>
-              <Popover>
+              <Popover open={openCompanyPopover} onOpenChange={setOpenCompanyPopover}>
                 <PopoverTrigger asChild>
                   <Button variant="outline" className="w-[800px] justify-between">
                     {companies.find(c => c._id === field.value)?.name || "-- Chọn công ty --"}
@@ -122,6 +127,7 @@ export function AddProject() {
                             onSelect={() => {
                               field.onChange(company._id)
                               setSelectedCompany(company._id)
+                              setOpenCompanyPopover(false);
                             }}
                           >
                             {company.name}
@@ -144,7 +150,7 @@ export function AddProject() {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Phòng ban</FormLabel>
-              <Popover>
+              <Popover open={openDepartmentPopover} onOpenChange={setOpenDepartmentPopover}>
                 <PopoverTrigger asChild>
                   <Button variant="outline" className="w-[800px] justify-between">
                     {departments.find(d => d._id === field.value)?.name || "-- Chọn phòng ban --"}
@@ -164,6 +170,7 @@ export function AddProject() {
                             onSelect={() => {
                               field.onChange(department._id)
                               setSelectedDepartment(department._id)
+                              setOpenDepartmentPopover(false);
                             }}
                           >
                             {department.name}
@@ -186,7 +193,7 @@ export function AddProject() {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Team</FormLabel>
-              <Popover>
+              <Popover open={openTeamPopover} onOpenChange={setOpenTeamPopover}>
                 <PopoverTrigger asChild>
                   <Button variant="outline" className="w-[800px] justify-between">
                     {teams.find(t => t._id === field.value)?.name || "-- Chọn team --"}
@@ -206,6 +213,7 @@ export function AddProject() {
                             onSelect={() => {
                               field.onChange(team._id)
                               setSelectedTeam(team._id)
+                              setOpenTeamPopover(false)
                             }}
                           >
                             {team.name}
