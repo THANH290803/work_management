@@ -33,7 +33,7 @@ export function Project() {
         filteredProjects,
         currentProjects,
         paginate,
-        openEdit,
+        // openEdit,
         handleDelete
     } = useProjects();
 
@@ -87,7 +87,7 @@ export function Project() {
                                             </button>
                                         </DropdownMenuTrigger>
                                         <DropdownMenuContent align="end">
-                                            <DropdownMenuItem onClick={() => openEdit(project)}>
+                                            <DropdownMenuItem onClick={() => router.push(`/project/edit-project?id=${project._id}`)}>
                                                 Sửa
                                             </DropdownMenuItem>
                                             <DropdownMenuItem className="text-red-500" onClick={() => handleDelete(project._id)}>
