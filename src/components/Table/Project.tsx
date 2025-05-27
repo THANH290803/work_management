@@ -69,7 +69,8 @@ export function Project() {
             <Table>
                 <TableHeader>
                     <TableRow>
-                        <TableHead style={{ width: '433px' }}>No.</TableHead>
+                        <TableHead style={{ width: '320px' }}>No.</TableHead>
+                        <TableHead className="text-left">Mã dự án</TableHead>
                         <TableHead className="text-center">Tên dự án</TableHead>
                     </TableRow>
                 </TableHeader>
@@ -78,7 +79,8 @@ export function Project() {
                         currentProjects.map((project, index) => (
                             <TableRow key={project._id}>
                                 <TableCell>{index + 1 + (currentPage - 1) * rowsPerPage}</TableCell>
-                                <TableCell className="text-center">{project.name}</TableCell>
+                                <TableCell className="text-left cursor-pointer hover:bg-gray-100" onClick={() => router.push(`/project/detail-project?id=${project._id}`)}>{project.code}</TableCell>
+                                <TableCell className="text-center cursor-pointer hover:bg-gray-100" onClick={() => router.push(`/project/detail-project?id=${project._id}`)}>{project.name}</TableCell>
                                 <TableCell className="text-right">
                                     <DropdownMenu>
                                         <DropdownMenuTrigger asChild>
